@@ -44,6 +44,7 @@ inc = list()
 defs = list()
 udefs = list()
 verbose = False
+quiet = False
 ifdefs = list()
 ifs = False
 
@@ -51,6 +52,7 @@ def handle_include(filename):
     global inc
     global defs
     global verbose
+    global quiet
     global ifs 
     
     lineno = 0
@@ -183,19 +185,25 @@ def handle_include(filename):
             if not os.path.exists(i):
                 print >> sys.stderr, 'Fatal Error : the input file ' + i + ' does not exit'
                 sys.exit(2)
-            print '/* leaving ' + os.path.basename(filename) + ' at ' + str(lineno) + ' */'
-            print '/* %include ' + os.path.basename(i) + ' */'
+
+            if not quiet:
+                print '/* leaving ' + os.path.basename(filename) + ' at ' + str(lineno) + ' */'
+                print '/* %include ' + os.path.basename(i) + ' */'
             handle_include(i)
             print ''
-            print '/* returning to ' + os.path.basename(filename) + ' at ' + str(lineno) + ' */'
+            if not quiet:
+                print '/* returning to ' + os.path.basename(filename) + ' at ' + str(lineno) + ' */'
         else:
             print line,
     
 def main():
     global inc
+    global verbose
+    global quiet
     cmdline = argparse.ArgumentParser(
         description = 'A lex/yacc preprocessor'
     )
+    cmdline.add_argument('-q', '--quiet', help='quiet', action="store_true")
     cmdline.add_argument('-v', '--verbose', help='verbose', action="store_true")
     cmdline.add_argument('-I', '--include', help='include path', action="append")
     cmdline.add_argument('-D', '--define', help='defines', action="append")
@@ -249,6 +257,10 @@ def main():
         for i in inc:
             print >> sys.stderr, 'Include path ' + i
 
+    if args.quiet:
+        quiet = True
+        verbose = False
+        
     handle_include(args.infile)
 
     
