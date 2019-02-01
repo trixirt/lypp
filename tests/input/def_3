@@ -1,0 +1,4 @@
+%def voo koo
+moovoobar
+%undef voo
+moovoobar

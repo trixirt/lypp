@@ -13,6 +13,7 @@ cpp                lypp
 #else            %else
 #endif           %endif
 #define d        %def %d
+#define d r      %def %d r
 #undef d         %undef %d
 
 Additional commands

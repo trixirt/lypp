@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2017, Tom Rix
+# Copyright (c) 2017-2019 Tom Rix
 # All rights reserved.
 #
 # You may distribute under the terms of :
@@ -43,6 +43,7 @@ import sys
 inc = list()
 defs = list()
 udefs = list()
+replacements = dict()
 verbose = False
 quiet = False
 ifdefs = list()
@@ -51,6 +52,8 @@ ifs = False
 def handle_include(filename):
     global inc
     global defs
+    global udefs
+    global replacements
     global verbose
     global quiet
     global ifs 
@@ -154,23 +157,34 @@ def handle_include(filename):
         if m:
             d = line.lstrip('%def')
             d = d.strip()
-            if verbose:
-                print >> sys.stderr, 'Define ' + d
-            if d not in defs:
-                defs.append(d)
-            if d in udefs:
-                udefs.remove(d)
+            w = d.split(None, 1)[0]
+            if w:
+                r = d.lstrip(w)
+                r = r.lstrip();
+                r = r.rstrip();
+                if verbose:
+                    print >> sys.stderr, 'Define ' + w
+                if w not in defs:
+                    defs.append(w)
+                    if r:
+                        replacements[w] = r
+                if w in udefs:
+                    udefs.remove(w)
             continue
         m = re.search(r'^%undef .*', line)
         if m:
             d = line.lstrip('%undef')
             d = d.strip()
-            if verbose:
-                print >> sys.stderr, 'Undefine ' + d
-            if d in defs:
-                defs.remove(d)
-            if d not in udefs:
-                udefs.append(d)
+            w = d.split(None, 1)[0]
+            if w:
+                if verbose:
+                    print >> sys.stderr, 'Undefine ' + d
+                if w in defs:
+                    defs.remove(w)
+                    if replacements.get(w):
+                        del replacements[w]
+                if w not in udefs:
+                    udefs.append(w)
             continue
         m = re.search(r'^%include .*', line)
         if m:
@@ -194,6 +208,8 @@ def handle_include(filename):
             if not quiet:
                 print '/* returning to ' + os.path.basename(filename) + ' at ' + str(lineno) + ' */'
         else:
+            for key in replacements:
+                line = line.replace(key, replacements[key])
             print line,
     
 def main():
