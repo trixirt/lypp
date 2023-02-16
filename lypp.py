@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #
-# Copyright (c) 2017-2019 Tom Rix
+# Copyright (c) 2017-2023 Tom Rix
 # All rights reserved.
 #
 # You may distribute under the terms of :
